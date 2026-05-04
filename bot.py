@@ -97,6 +97,18 @@ def main():
     os.makedirs('/app/photos', exist_ok=True)
     app.router.add_static('/photos', '/app/photos')
     
+    # ========== НОВЫЙ КОД: Отдаём Mini App HTML ==========
+    async def serve_miniapp(request):
+        # Ищем index.html в папке mini-app
+        html_path = os.path.join(os.path.dirname(__file__), 'mini-app', 'index.html')
+        if os.path.exists(html_path):
+            return web.FileResponse(html_path)
+        return web.Response(text="Mini App not found. Please check deployment.", status=404)
+    
+    app.router.add_get('/', serve_miniapp)
+    app.router.add_get('/index.html', serve_miniapp)
+    # ====================================================
+    
     webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
     webhook_requests_handler.register(app, path=settings.WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
