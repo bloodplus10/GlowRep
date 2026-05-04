@@ -319,117 +319,10 @@
         }
         .btn-outline:active { background: #fff; color: #000; }
 
-        /* ===== ФОРМА ===== */
-        .form-group { margin-bottom: 16px; }
-        .form-label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-            color: #e63946;
-        }
-        .form-input, .form-textarea {
-            width: 100%;
-            background: #111;
-            border: 3px solid #222;
-            color: #fff;
-            padding: 12px 14px;
-            font-family: 'Arial Black', sans-serif;
-            font-size: 14px;
-            outline: none;
-        }
-        .form-input:focus, .form-textarea:focus { border-color: #e63946; }
-        .form-textarea { min-height: 100px; resize: vertical; }
-
-        .photo-upload {
-            border: 3px dashed #333;
-            padding: 24px;
-            text-align: center;
-            cursor: pointer;
-            color: #666;
-            font-size: 13px;
-            text-transform: uppercase;
-        }
-        .photo-upload:active { border-color: #e63946; color: #e63946; }
-
         /* ===== ИЗБРАННОЕ ===== */
         .fav-count-text { color: #e63946; font-size: 12px; margin-top: 2px; }
 
-        /* ===== ПРОФИЛЬ ===== */
-        .profile-card {
-            background: #111;
-            border: 3px solid #222;
-            padding: 24px;
-            text-align: center;
-            margin-bottom: 16px;
-        }
-        .profile-avatar {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: #333;
-            margin: 0 auto 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px;
-        }
-        .profile-name { font-size: 20px; font-weight: 900; text-transform: uppercase; }
-        .profile-city { color: #777; font-size: 12px; margin-top: 2px; }
-        .profile-rating {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 8px;
-        }
-        .stars { color: #e63946; font-size: 16px; letter-spacing: 2px; }
-        .rating-text { color: #888; font-size: 12px; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
-        .stat-card { background: #111; border: 2px solid #222; padding: 16px; text-align: center; }
-        .stat-number { color: #e63946; font-size: 24px; font-weight: 900; }
-        .stat-label { color: #666; font-size: 10px; text-transform: uppercase; margin-top: 2px; }
-
-        /* Отзывы */
-        .reviews-section { margin-bottom: 16px; }
-        .reviews-title {
-            font-size: 16px; font-weight: 900; text-transform: uppercase;
-            margin-bottom: 12px; color: #fff;
-        }
-        .review-card {
-            background: #111;
-            border: 2px solid #222;
-            padding: 14px;
-            margin-bottom: 8px;
-        }
-        .review-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-        .review-author { font-size: 13px; color: #e63946; text-transform: uppercase; font-weight: 900; }
-        .review-date { font-size: 10px; color: #666; }
-        .review-text { font-size: 13px; color: #aaa; font-family: 'Arial', sans-serif; line-height: 1.4; margin-bottom: 6px; }
-        .review-stars { color: #e63946; font-size: 12px; }
-
-        /* Кнопки профиля */
-        .profile-buttons { display: flex; flex-direction: column; gap: 8px; }
-        .profile-btn {
-            width: 100%;
-            background: none;
-            border: 3px solid #222;
-            color: #fff;
-            padding: 14px;
-            font-weight: 900;
-            text-transform: uppercase;
-            font-size: 13px;
-            cursor: pointer;
-            font-family: inherit;
-            text-align: center;
-            transition: all 0.15s;
-        }
-        .profile-btn:active { border-color: #e63946; color: #e63946; }
-        .profile-btn.logout { border-color: #333; color: #666; }
-        .profile-btn.logout:active { border-color: #e63946; color: #e63946; }
+        /* ===== ПРОФИЛЬ (оставлено для будущего) ===== */
 
         /* ===== ПУСТО ===== */
         .empty-state { text-align: center; padding: 40px 16px; color: #555; }
@@ -491,40 +384,6 @@
                 </div>
             </div>
 
-            <div class="filter-section">
-                <div class="filter-section-title">📦 Категория</div>
-                <div class="filter-chips" id="cat-chips">
-                    <span class="filter-chip selected" data-value="">Все</span>
-                    <span class="filter-chip" data-value="outerwear">Верх</span>
-                    <span class="filter-chip" data-value="dresses">Платья</span>
-                    <span class="filter-chip" data-value="shoes">Обувь</span>
-                    <span class="filter-chip" data-value="bags">Сумки</span>
-                    <span class="filter-chip" data-value="accessories">Акс</span>
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <div class="filter-section-title">📏 Размер</div>
-                <div class="filter-chips" id="size-chips">
-                    <span class="filter-chip selected" data-value="">Все</span>
-                    <span class="filter-chip" data-value="XS">XS</span>
-                    <span class="filter-chip" data-value="S">S</span>
-                    <span class="filter-chip" data-value="M">M</span>
-                    <span class="filter-chip" data-value="L">L</span>
-                    <span class="filter-chip" data-value="XL">XL</span>
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <div class="filter-section-title">⭐ Состояние</div>
-                <div class="filter-chips" id="cond-chips">
-                    <span class="filter-chip selected" data-value="">Все</span>
-                    <span class="filter-chip" data-value="Новое">Новое</span>
-                    <span class="filter-chip" data-value="Отличное">Отличное</span>
-                    <span class="filter-chip" data-value="Хорошее">Хорошее</span>
-                </div>
-            </div>
-
             <div class="filter-actions">
                 <button class="btn-filter-reset" onclick="resetFilters()">СБРОСИТЬ</button>
                 <button class="btn-filter-apply" onclick="applyFilters()">ПРИМЕНИТЬ</button>
@@ -566,93 +425,34 @@
         </div>
     </div>
 
-    <!-- ========== СОЗДАНИЕ ========== -->
-    <div id="create-screen" class="screen">
-        <button class="back-btn" onclick="showScreen('catalog-screen')">← НАЗАД</button>
-        <div class="logo" style="font-size:24px; text-align:center; margin-bottom:20px;">НОВОЕ</div>
-        <div class="form-group"><label class="form-label">Название</label><input class="form-input" placeholder="ЧТО ПРОДАЁШЬ?"></div>
-        <div class="form-group"><label class="form-label">Цена ₽</label><input type="number" class="form-input" placeholder="5000"></div>
-        <div class="form-group"><label class="form-label">Описание</label><textarea class="form-textarea" placeholder="ОПИШИ ТОВАР..."></textarea></div>
-        <div class="photo-upload" onclick="alert('ЗАГРУЗКА ФОТО')">📷 ДОБАВИТЬ ФОТО</div>
-        <button class="btn-primary" style="width:100%; margin-top:16px;">ОПУБЛИКОВАТЬ</button>
-    </div>
-
-    <!-- ========== ПРОФИЛЬ ========== -->
-    <div id="profile-screen" class="screen">
-        <div class="profile-card">
-            <div class="profile-avatar">👤</div>
-            <div class="profile-name">АННА М.</div>
-            <div class="profile-city">📍 МОСКВА</div>
-            <div class="profile-rating">
-                <span class="stars">★★★★★</span>
-                <span class="rating-text">4.9 • 27 отзывов</span>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card"><div class="stat-number">12</div><div class="stat-label">Активно</div></div>
-            <div class="stat-card"><div class="stat-number">48</div><div class="stat-label">Продано</div></div>
-            <div class="stat-card"><div class="stat-number">156</div><div class="stat-label">Избранное</div></div>
-        </div>
-
-        <!-- Отзывы -->
-        <div class="reviews-section">
-            <div class="reviews-title">📝 ОТЗЫВЫ</div>
-            <div class="review-card">
-                <div class="review-header">
-                    <span class="review-author">МАКСИМ К.</span>
-                    <span class="review-date">12.04.2025</span>
-                </div>
-                <div class="review-stars">★★★★★</div>
-                <div class="review-text">Отличный продавец! Платье пришло за 2 дня, состояние идеальное. Рекомендую!</div>
-            </div>
-            <div class="review-card">
-                <div class="review-header">
-                    <span class="review-author">ДИАНА В.</span>
-                    <span class="review-date">05.04.2025</span>
-                </div>
-                <div class="review-stars">★★★★★</div>
-                <div class="review-text">Всё супер, кроссовки как новые. Спасибо за подарок 🎁</div>
-            </div>
-            <div class="review-card">
-                <div class="review-header">
-                    <span class="review-author">ОЛЕГ Т.</span>
-                    <span class="review-date">28.03.2025</span>
-                </div>
-                <div class="review-stars">★★★★☆</div>
-                <div class="review-text">Хорошая сумка, но доставка задержалась на день.</div>
-            </div>
-        </div>
-
-        <div class="profile-buttons">
-            <button class="profile-btn">📦 МОИ ОБЪЯВЛЕНИЯ</button>
-            <button class="profile-btn">⚙️ НАСТРОЙКИ</button>
-            <button class="profile-btn logout">🚪 ВЫЙТИ</button>
-        </div>
-    </div>
-
     <!-- ========== МЕНЮ ========== -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showScreen('catalog-screen')"><span class="nav-icon">🏠</span>Главная</div>
         <div class="nav-item" onclick="showScreen('favorites-screen')"><span class="nav-icon">❤️</span>Избранное</div>
-        <div class="nav-item" onclick="showScreen('create-screen')"><span class="nav-icon">➕</span>Создать</div>
-        <div class="nav-item" onclick="showScreen('profile-screen')"><span class="nav-icon">👤</span>Профиль</div>
+        <div class="nav-item" onclick="alert('Скоро')"><span class="nav-icon">➕</span>Создать</div>
+        <div class="nav-item" onclick="alert('Скоро')"><span class="nav-icon">👤</span>Профиль</div>
     </div>
 
     <script>
-        const products = [
-            { id:1, brand:'Zara', title:'Платье вечернее', price:4990, city:'Москва', cat:'dresses', desc:'Красивое платье, надела один раз.', photos:['https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600'], size:'M', cond:'Отличное' },
-            { id:2, brand:'Nike', title:'Air Force 1', price:8900, city:'СПб', cat:'shoes', desc:'Кроссовки новые, не подошёл размер.', photos:['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600'], size:'39', cond:'Новое' },
-            { id:3, brand:'Gucci', title:'Сумка Dionysus', price:65000, city:'Казань', cat:'bags', desc:'Оригинал из Милана.', photos:['https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600'], size:'—', cond:'Отличное' },
-            { id:4, brand:'H&M', title:'Тренч бежевый', price:3200, city:'Москва', cat:'outerwear', desc:'Носила один сезон.', photos:['https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?w=600'], size:'L', cond:'Хорошее' },
-            { id:5, brand:'Balenciaga', title:'Худи оверсайз', price:18000, city:'Москва', cat:'outerwear', desc:'Оригинал.', photos:['https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600'], size:'XL', cond:'Отличное' },
-            { id:6, brand:'Pandora', title:'Кольцо серебро', price:2900, city:'Москва', cat:'accessories', desc:'Новое.', photos:['https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600'], size:'17', cond:'Новое' }
-        ];
-
-        let favs = [1,3,5];
+        // Глобальные переменные
+        let products = [];
+        let favs = JSON.parse(localStorage.getItem('glowrep_favs') || '[]');
         let curProd = null;
         let filtersOpen = false;
-        let activeFilters = { city: '', cat: '', size: '', cond: '', priceFrom: '', priceTo: '' };
+        let activeFilters = { city: '', priceFrom: '', priceTo: '' };
+
+        // Загрузка товаров из API
+        async function loadProducts() {
+            try {
+                const res = await fetch('/api/products');
+                products = await res.json();
+                renderCatalog();
+            } catch(e) {
+                console.error('API error:', e);
+                products = [];
+                renderCatalog();
+            }
+        }
 
         // Навигация
         function showScreen(id) {
@@ -668,43 +468,28 @@
         // Фильтры
         function toggleFilters() {
             filtersOpen = !filtersOpen;
-            const panel = document.getElementById('filter-panel');
-            const btn = document.getElementById('filter-toggle');
-            panel.classList.toggle('open', filtersOpen);
-            btn.classList.toggle('active', filtersOpen);
+            document.getElementById('filter-panel').classList.toggle('open', filtersOpen);
+            document.getElementById('filter-toggle').classList.toggle('active', filtersOpen);
         }
-
-        function handleChipClick(event, groupId, filterKey) {
-            document.querySelectorAll(`#${groupId} .filter-chip`).forEach(c => c.classList.remove('selected'));
-            event.target.classList.add('selected');
-            activeFilters[filterKey] = event.target.dataset.value;
-        }
-
-        // Вешаем обработчики на чипсы
-        ['city-chips', 'cat-chips', 'size-chips', 'cond-chips'].forEach(groupId => {
-            const key = groupId.replace('-chips', '').replace('cat', 'cat');
-            const finalKey = key === 'cat' ? 'cat' : key;
-            document.getElementById(groupId).addEventListener('click', function(e) {
-                if (e.target.classList.contains('filter-chip')) {
-                    handleChipClick(e, groupId, finalKey);
-                }
-            });
-        });
 
         function applyFilters() {
             activeFilters.priceFrom = document.getElementById('price-from').value;
             activeFilters.priceTo = document.getElementById('price-to').value;
+            
+            const cityChip = document.querySelector('#city-chips .filter-chip.selected');
+            activeFilters.city = cityChip ? cityChip.dataset.value : '';
+
             renderActiveFilterTags();
             toggleFilters();
             renderCatalog();
         }
 
         function resetFilters() {
-            activeFilters = { city: '', cat: '', size: '', cond: '', priceFrom: '', priceTo: '' };
+            activeFilters = { city: '', priceFrom: '', priceTo: '' };
             document.getElementById('price-from').value = '';
             document.getElementById('price-to').value = '';
-            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('selected'));
-            document.querySelectorAll('.filter-chip[data-value=""]').forEach(c => c.classList.add('selected'));
+            document.querySelectorAll('#city-chips .filter-chip').forEach(c => c.classList.remove('selected'));
+            document.querySelector('#city-chips .filter-chip[data-value=""]').classList.add('selected');
             renderActiveFilterTags();
             renderCatalog();
         }
@@ -713,11 +498,8 @@
             const container = document.getElementById('active-filters');
             const tags = [];
             if (activeFilters.city) tags.push({ label: activeFilters.city, key: 'city' });
-            if (activeFilters.cat) tags.push({ label: activeFilters.cat, key: 'cat' });
-            if (activeFilters.size) tags.push({ label: activeFilters.size, key: 'size' });
-            if (activeFilters.cond) tags.push({ label: activeFilters.cond, key: 'cond' });
             if (activeFilters.priceFrom || activeFilters.priceTo) {
-                tags.push({ label: `${activeFilters.priceFrom || '0'}–${activeFilters.priceTo || '∞'} ₽`, key: 'price' });
+                tags.push({ label: `${activeFilters.priceFrom || '0'}-${activeFilters.priceTo || '∞'} ₽`, key: 'price' });
             }
             container.innerHTML = tags.map(t => 
                 `<span class="active-filter-tag" onclick="removeFilter('${t.key}')">${t.label} <span>×</span></span>`
@@ -732,28 +514,34 @@
                 document.getElementById('price-to').value = '';
             } else {
                 activeFilters[key] = '';
-                const groupId = key === 'cat' ? 'cat-chips' : `${key}-chips`;
-                document.querySelectorAll(`#${groupId} .filter-chip`).forEach(c => c.classList.remove('selected'));
-                document.querySelector(`#${groupId} .filter-chip[data-value=""]`).classList.add('selected');
+                document.querySelectorAll('#city-chips .filter-chip').forEach(c => c.classList.remove('selected'));
+                document.querySelector('#city-chips .filter-chip[data-value=""]').classList.add('selected');
             }
             renderActiveFilterTags();
             renderCatalog();
         }
 
+        // Клики по чипсам города
+        document.getElementById('city-chips').addEventListener('click', function(e) {
+            if (e.target.classList.contains('filter-chip')) {
+                document.querySelectorAll('#city-chips .filter-chip').forEach(c => c.classList.remove('selected'));
+                e.target.classList.add('selected');
+                activeFilters.city = e.target.dataset.value;
+            }
+        });
+
         // Каталог
         function renderCatalog() {
-            let p = products;
+            let p = [...products];
             const q = document.getElementById('search').value.toLowerCase();
-            if (q) p = p.filter(x => x.title.toLowerCase().includes(q) || x.brand.toLowerCase().includes(q));
+            if (q) p = p.filter(x => x.title.toLowerCase().includes(q));
             if (activeFilters.city) p = p.filter(x => x.city === activeFilters.city);
-            if (activeFilters.cat) p = p.filter(x => x.cat === activeFilters.cat);
-            if (activeFilters.size) p = p.filter(x => x.size === activeFilters.size);
-            if (activeFilters.cond) p = p.filter(x => x.cond === activeFilters.cond);
             if (activeFilters.priceFrom) p = p.filter(x => x.price >= Number(activeFilters.priceFrom));
             if (activeFilters.priceTo) p = p.filter(x => x.price <= Number(activeFilters.priceTo));
 
             const grid = document.getElementById('catalog-grid');
             const empty = document.getElementById('catalog-empty');
+            
             if (p.length === 0) {
                 grid.innerHTML = '';
                 empty.style.display = 'block';
@@ -763,11 +551,11 @@
                     const isFav = favs.includes(x.id);
                     return `
                     <div class="product-card">
-                        <span class="fav-icon-card" onclick="event.stopPropagation(); toggleFavById(${x.id}); renderCatalog();">${isFav ? '❤️' : '🤍'}</span>
-                        <div onclick="openProd(${x.id})">
-                            <img src="${x.photos[0]}" class="product-img" alt="${x.title}">
+                        <span class="fav-icon-card" onclick="event.stopPropagation(); toggleFavById('${x.id}'); renderCatalog();">${isFav ? '❤️' : '🤍'}</span>
+                        <div onclick="openProd('${x.id}')">
+                            <img src="${x.photo || 'https://via.placeholder.com/400/1a1a2e/ff2d95?text=GLOW'}" class="product-img" alt="${x.title}" onerror="this.src='https://via.placeholder.com/400/1a1a2e/ff2d95?text=GLOW'">
                             <div class="product-info">
-                                <div class="product-brand">${x.brand}</div>
+                                <div class="product-brand">GLOWREP</div>
                                 <div class="product-name">${x.title}</div>
                                 <div class="product-price">${x.price.toLocaleString()} ₽</div>
                                 <div class="product-city">📍 ${x.city}</div>
@@ -780,22 +568,28 @@
 
         function toggleFavById(id) {
             const i = favs.indexOf(id);
-            i > -1 ? favs.splice(i,1) : favs.push(id);
+            if (i > -1) {
+                favs.splice(i, 1);
+            } else {
+                favs.push(id);
+            }
+            localStorage.setItem('glowrep_favs', JSON.stringify(favs));
             if (curProd && curProd.id === id) updateFavBtn();
         }
 
         function openProd(id) {
             curProd = products.find(x => x.id === id);
-            document.getElementById('product-img').src = curProd.photos[0];
-            document.getElementById('product-brand-detail').textContent = curProd.brand;
+            if (!curProd) return;
+            
+            document.getElementById('product-img').src = curProd.photo || 'https://via.placeholder.com/400/1a1a2e/ff2d95?text=GLOW';
+            document.getElementById('product-brand-detail').textContent = 'GLOWREP';
             document.getElementById('product-title').textContent = curProd.title;
             document.getElementById('product-price').textContent = curProd.price.toLocaleString() + ' ₽';
-            document.getElementById('product-desc').textContent = curProd.desc;
+            document.getElementById('product-desc').textContent = curProd.description || 'Описание отсутствует';
             document.getElementById('product-details').innerHTML = `
-                <div class="detail-row"><span class="detail-label">Размер</span><span class="detail-value">${curProd.size}</span></div>
-                <div class="detail-row"><span class="detail-label">Состояние</span><span class="detail-value">${curProd.cond}</span></div>
                 <div class="detail-row"><span class="detail-label">Город</span><span class="detail-value">${curProd.city}</span></div>
-                <div class="detail-row"><span class="detail-label">Бренд</span><span class="detail-value">${curProd.brand}</span></div>
+                <div class="detail-row"><span class="detail-label">Цена</span><span class="detail-value">${curProd.price.toLocaleString()} ₽</span></div>
+                <div class="detail-row"><span class="detail-label">Дата</span><span class="detail-value">${new Date(curProd.created_at).toLocaleDateString('ru-RU')}</span></div>
             `;
             updateFavBtn();
             showScreen('product-screen');
@@ -826,11 +620,11 @@
                     const isFav = favs.includes(x.id);
                     return `
                     <div class="product-card">
-                        <span class="fav-icon-card" onclick="event.stopPropagation(); toggleFavById(${x.id}); renderFav();">${isFav ? '❤️' : '🤍'}</span>
-                        <div onclick="openProd(${x.id})">
-                            <img src="${x.photos[0]}" class="product-img" alt="${x.title}">
+                        <span class="fav-icon-card" onclick="event.stopPropagation(); toggleFavById('${x.id}'); renderFav();">${isFav ? '❤️' : '🤍'}</span>
+                        <div onclick="openProd('${x.id}')">
+                            <img src="${x.photo || 'https://via.placeholder.com/400/1a1a2e/ff2d95?text=GLOW'}" class="product-img" alt="${x.title}" onerror="this.src='https://via.placeholder.com/400/1a1a2e/ff2d95?text=GLOW'">
                             <div class="product-info">
-                                <div class="product-brand">${x.brand}</div>
+                                <div class="product-brand">GLOWREP</div>
                                 <div class="product-name">${x.title}</div>
                                 <div class="product-price">${x.price.toLocaleString()} ₽</div>
                             </div>
@@ -841,8 +635,9 @@
         }
 
         document.getElementById('search').addEventListener('input', renderCatalog);
-        renderCatalog();
-        renderActiveFilterTags();
+
+        // Старт
+        loadProducts();
     </script>
 </body>
 </html>

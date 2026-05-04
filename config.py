@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     BOT_TOKEN: str
     WEBHOOK_HOST: str
     WEBHOOK_PATH: str = "/webhook"
+    WEBAPP_URL: str
     ADMIN_IDS: str
     POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: int = 5432
