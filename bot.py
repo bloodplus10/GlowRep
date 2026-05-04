@@ -97,23 +97,59 @@ def main():
     os.makedirs('/app/photos', exist_ok=True)
     app.router.add_static('/photos', '/app/photos')
     
-    # ========== НОВЫЙ КОД: Отдаём Mini App HTML ==========
+    # ========== ОТДАЁМ MINI APP ПО КОРНЕВОМУ ПУТИ ==========
     async def serve_miniapp(request):
-        # Ищем index.html в папке mini-app
+        # Путь к index.html
         html_path = os.path.join(os.path.dirname(__file__), 'mini-app', 'index.html')
+        
+        # Диагностика в логах
+        logger.info(f"Looking for Mini App at: {html_path}")
+        logger.info(f"File exists: {os.path.exists(html_path)}")
+        logger.info(f"Current directory: {os.path.dirname(__file__)}")
+        
         if os.path.exists(html_path):
-            return web.FileResponse(html_path)
-        return web.Response(text="Mini App not found. Please check deployment.", status=404)
+            return web.FileResponse(html_path, headers={
+                'Content-Type': 'text/html; charset=utf-8'
+            })
+        else:
+            # Если файла нет, показываем простую заглушку
+            html_content = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>GLOWREP</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <script src="https://telegram.org/js/telegram-web-app.js"></script>
+            </head>
+            <body>
+                <h1>🔥 GLOWREP</h1>
+                <p>Mini App загрузился, но index.html не найден.</p>
+                <p>Создайте файл mini-app/index.html в репозитории.</p>
+                <button onclick="window.Telegram.WebApp.close()">Закрыть</button>
+                <script>
+                    const tg = window.Telegram.WebApp;
+                    tg.ready();
+                    tg.expand();
+                    tg.MainButton.setText('Тест').show();
+                </script>
+            </body>
+            </html>
+            """
+            return web.Response(text=html_content, content_type='text/html')
     
+    # Регистрируем обработчики корневых путей (ДО вебхука!)
     app.router.add_get('/', serve_miniapp)
     app.router.add_get('/index.html', serve_miniapp)
     # ====================================================
     
+    # Настройка вебхука (должна быть ПОСЛЕ обработчиков)
     webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
     webhook_requests_handler.register(app, path=settings.WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
     
     port = int(os.getenv("PORT", 8080))
+    logger.info(f"Starting server on 0.0.0.0:{port}")
     web.run_app(app, host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
