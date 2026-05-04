@@ -15,6 +15,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 async def on_startup(bot: Bot):
+    # Создаём папку для фото
+    os.makedirs('/app/photos', exist_ok=True)
+    
     async with engine.begin() as conn:
         from database.models import Base
         await conn.run_sync(Base.metadata.create_all)
@@ -91,6 +94,7 @@ def main():
     app.router.add_get('/api/products', api_products)
     
     # Статика для фото
+    os.makedirs('/app/photos', exist_ok=True)
     app.router.add_static('/photos', '/app/photos')
     
     webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
