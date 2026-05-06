@@ -7,7 +7,6 @@ from aiohttp import web
 from redis.asyncio import Redis
 from config import settings
 from database.engine import engine, async_session
-from services.s3_client import ensure_bucket, upload_photo_to_minio
 from sqlalchemy import select, func
 from database.models import Ad, AdPhoto, User, Favorite
 
@@ -19,7 +18,16 @@ async def on_startup(bot: Bot):
     async with engine.begin() as conn:
         from database.models import Base
         await conn.run_sync(Base.metadata.create_all)
-    await ensure_bucket()
+    
+    # Создаём тестового пользователя если нет
+    async with async_session() as session:
+        from config import settings
+        test_user = await session.execute(select(User).where(User.telegram_id == 1))
+        if not test_user.scalar_one_or_none():
+            test_user = User(telegram_id=1, first_name="Test User", username="test")
+            session.add(test_user)
+            await session.commit()
+    
     await bot.set_webhook(f"{settings.WEBHOOK_HOST}{settings.WEBHOOK_PATH}")
     logger.info("Webhook set")
 
@@ -27,10 +35,9 @@ async def on_shutdown(bot: Bot):
     await bot.delete_webhook()
     await engine.dispose()
 
-# ========== API ДЛЯ MINI APP ==========
+# ========== API ==========
 
 async def api_products(request):
-    """Получение списка товаров"""
     async with async_session() as session:
         result = await session.execute(
             select(Ad).where(Ad.status == "active").order_by(Ad.created_at.desc()).limit(50)
@@ -54,15 +61,9 @@ async def api_products(request):
         return web.json_response(products)
 
 async def api_create_product(request):
-    """Создание объявления через Mini App"""
     try:
         data = await request.post()
-        init_data = data.get('init_data', '')
-        
-        # Временно: получаем user_id из init_data (упрощённо)
-        # В реальном проекте нужно верифицировать init_data через бота
-        user_id = 1  # Временный ID, позже заменим на реальную проверку
-        
+        user_id = data.get('user_id')
         title = data.get('title')
         price = data.get('price')
         city = data.get('city', '')
@@ -70,106 +71,52 @@ async def api_create_product(request):
         description = data.get('description', '')
         
         if not title or not price or not description:
-            return web.json_response({'success': False, 'error': 'Заполните все поля'}, status=400)
+            return web.json_response({'success': False, 'error': 'Fill all required fields'}, status=400)
         
         async with async_session() as session:
+            # Находим или создаём пользователя
+            user_result = await session.execute(select(User).where(User.telegram_id == int(user_id)))
+            user = user_result.scalar_one_or_none()
+            if not user:
+                user = User(telegram_id=int(user_id), first_name="User", username=f"user_{user_id}")
+                session.add(user)
+                await session.flush()
+            
             # Создаём объявление
             ad = Ad(
-                user_id=user_id,
+                user_id=user.id,
                 title=title,
                 price=float(price),
                 city=city,
                 category_id=int(category_id),
                 description=description,
-                status="pending"
+                status="active"
             )
             session.add(ad)
             await session.flush()
             
-            # Сохраняем фото если есть
+            # Сохраняем фото
             photo_file = data.get('photo')
             if photo_file and hasattr(photo_file, 'file'):
-                file_content = await photo_file.read()
                 filename = f"{uuid.uuid4()}.jpg"
-                # Сохраняем через MinIO
-                from services.s3_client import upload_photo_to_minio
-                # Временно сохраняем локально
                 os.makedirs('/app/photos', exist_ok=True)
                 file_path = f"/app/photos/{filename}"
+                content = await photo_file.read()
                 with open(file_path, "wb") as f:
-                    f.write(file_content)
+                    f.write(content)
                 
                 ad_photo = AdPhoto(ad_id=ad.id, file_path=filename, order=0)
                 session.add(ad_photo)
             
             await session.commit()
         
+        logger.info(f"Product created: {ad.id} by user {user_id}")
         return web.json_response({'success': True, 'ad_id': str(ad.id)})
     except Exception as e:
         logger.error(f"Error creating product: {e}")
         return web.json_response({'success': False, 'error': str(e)}, status=500)
 
-async def api_favorites(request):
-    """Получение избранных товаров пользователя"""
-    user_id = request.query.get('user_id')
-    if not user_id:
-        return web.json_response([], status=200)
-    
-    async with async_session() as session:
-        result = await session.execute(
-            select(Ad).join(Favorite).where(Favorite.user_id == int(user_id), Ad.status == "active")
-        )
-        ads = result.scalars().all()
-        products = []
-        for ad in ads:
-            photo = (await session.execute(
-                select(AdPhoto).where(AdPhoto.ad_id == ad.id).limit(1)
-            )).scalar_one_or_none()
-            products.append({
-                "id": str(ad.id),
-                "title": ad.title,
-                "price": float(ad.price),
-                "photo": f"/photos/{photo.file_path}" if photo else None
-            })
-        return web.json_response(products)
-
-async def api_profile(request):
-    """Получение профиля пользователя"""
-    user_id = request.query.get('user_id')
-    if not user_id:
-        return web.json_response({'error': 'No user_id'}, status=400)
-    
-    async with async_session() as session:
-        # Получаем пользователя
-        user_result = await session.execute(
-            select(User).where(User.telegram_id == int(user_id))
-        )
-        user = user_result.scalar_one_or_none()
-        
-        if not user:
-            return web.json_response({
-                'first_name': 'Пользователь',
-                'ads_count': 0,
-                'favorites_count': 0
-            })
-        
-        # Считаем объявления и избранное
-        ads_count = await session.execute(
-            select(func.count()).where(Ad.user_id == user.id)
-        )
-        favorites_count = await session.execute(
-            select(func.count()).where(Favorite.user_id == user.id)
-        )
-        
-        return web.json_response({
-            'first_name': user.first_name or 'Пользователь',
-            'username': user.username,
-            'ads_count': ads_count.scalar() or 0,
-            'favorites_count': favorites_count.scalar() or 0
-        })
-
 async def api_toggle_favorite(request):
-    """Добавить/удалить из избранного"""
     try:
         data = await request.json()
         user_id = data.get('user_id')
@@ -179,16 +126,13 @@ async def api_toggle_favorite(request):
             return web.json_response({'success': False, 'error': 'Missing data'}, status=400)
         
         async with async_session() as session:
-            # Находим пользователя
-            user_result = await session.execute(
-                select(User).where(User.telegram_id == int(user_id))
-            )
+            user_result = await session.execute(select(User).where(User.telegram_id == int(user_id)))
             user = user_result.scalar_one_or_none()
-            
             if not user:
-                return web.json_response({'success': False, 'error': 'User not found'}, status=404)
+                user = User(telegram_id=int(user_id), first_name="User", username=f"user_{user_id}")
+                session.add(user)
+                await session.flush()
             
-            # Проверяем, есть ли уже в избранном
             fav_result = await session.execute(
                 select(Favorite).where(Favorite.user_id == user.id, Favorite.ad_id == int(ad_id))
             )
@@ -207,7 +151,31 @@ async def api_toggle_favorite(request):
     except Exception as e:
         return web.json_response({'success': False, 'error': str(e)}, status=500)
 
-# ========== ОТДАЁМ MINI APP ==========
+async def api_profile(request):
+    user_id = request.query.get('user_id')
+    if not user_id:
+        return web.json_response({}, status=200)
+    
+    async with async_session() as session:
+        user_result = await session.execute(select(User).where(User.telegram_id == int(user_id)))
+        user = user_result.scalar_one_or_none()
+        
+        if not user:
+            return web.json_response({
+                'first_name': 'User',
+                'ads_count': 0,
+                'favorites_count': 0
+            })
+        
+        ads_count = await session.execute(select(func.count()).where(Ad.user_id == user.id))
+        favorites_count = await session.execute(select(func.count()).where(Favorite.user_id == user.id))
+        
+        return web.json_response({
+            'first_name': user.first_name or 'User',
+            'username': user.username,
+            'ads_count': ads_count.scalar() or 0,
+            'favorites_count': favorites_count.scalar() or 0
+        })
 
 async def serve_miniapp(request):
     html_path = os.path.join(os.path.dirname(__file__), 'mini-app', 'index.html')
@@ -216,15 +184,12 @@ async def serve_miniapp(request):
     else:
         html_content = """
         <!DOCTYPE html>
-        <html>
-        <head><meta charset="UTF-8"><title>GLOWREP</title><script src="https://telegram.org/js/telegram-web-app.js"></script></head>
-        <body><h1>🔥 GLOWREP</h1><p>Загрузка...</p><script>
-        const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-        </script></body></html>
+        <html><head><meta charset="UTF-8"><title>GLOWREP</title><script src="https://telegram.org/js/telegram-web-app.js"></script></head>
+        <body><h1>GLOWREP</h1><script>const tg=window.Telegram.WebApp;tg.ready();tg.expand();</script></body></html>
         """
         return web.Response(text=html_content, content_type='text/html')
 
-# ========== ОСНОВНОЙ ЗАПУСК ==========
+# ========== MAIN ==========
 
 def main():
     redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
@@ -264,22 +229,21 @@ def main():
     
     app = web.Application()
     
-    # API маршруты для Mini App
+    # API
     app.router.add_get('/api/products', api_products)
     app.router.add_post('/api/create-product', api_create_product)
-    app.router.add_get('/api/favorites', api_favorites)
-    app.router.add_get('/api/profile', api_profile)
     app.router.add_post('/api/toggle-favorite', api_toggle_favorite)
+    app.router.add_get('/api/profile', api_profile)
     
-    # Статика для фото
+    # Статика
     os.makedirs('/app/photos', exist_ok=True)
     app.router.add_static('/photos', '/app/photos')
     
-    # Корневой путь - Mini App
+    # Mini App
     app.router.add_get('/', serve_miniapp)
     app.router.add_get('/index.html', serve_miniapp)
     
-    # Вебхук для Telegram
+    # Webhook
     webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
     webhook_requests_handler.register(app, path=settings.WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)

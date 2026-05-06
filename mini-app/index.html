@@ -49,7 +49,6 @@
             background: rgba(36, 129, 204, 0.1);
         }
         
-        /* Контент вкладок */
         .tab-content {
             display: none;
             padding: 16px;
@@ -59,7 +58,7 @@
             display: block;
         }
         
-        /* Карточка товара */
+        /* Product Card */
         .product-card {
             background: var(--tg-theme-secondary-bg-color, #f9f9f9);
             border-radius: 12px;
@@ -67,10 +66,24 @@
             margin-bottom: 12px;
             cursor: pointer;
             transition: transform 0.1s;
+            position: relative;
         }
         
         .product-card:active {
             transform: scale(0.98);
+        }
+        
+        .favorite-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 10;
         }
         
         .product-image {
@@ -100,7 +113,7 @@
             margin-top: 4px;
         }
         
-        /* Форма создания */
+        /* Form */
         .form-group {
             margin-bottom: 16px;
         }
@@ -112,7 +125,9 @@
             color: var(--tg-theme-hint-color, #666666);
         }
         
-        .form-group input, .form-group textarea, .form-group select {
+        .form-group input, 
+        .form-group textarea, 
+        .form-group select {
             width: 100%;
             padding: 12px;
             border: 1px solid var(--tg-theme-hint-color, #cccccc);
@@ -144,20 +159,14 @@
             opacity: 0.8;
         }
         
-        .loading {
+        .loading, .empty {
             text-align: center;
             padding: 40px;
             color: var(--tg-theme-hint-color, #666666);
         }
         
-        .empty {
-            text-align: center;
-            padding: 40px;
-            color: var(--tg-theme-hint-color, #666666);
-        }
-        
-        /* Профиль */
-        .profile-info {
+        /* Profile */
+        .profile-header {
             background: var(--tg-theme-secondary-bg-color, #f9f9f9);
             border-radius: 12px;
             padding: 20px;
@@ -189,24 +198,61 @@
             font-size: 12px;
             color: var(--tg-theme-hint-color, #666666);
         }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 90%;
+            width: 320px;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .close-modal {
+            margin-top: 16px;
+        }
     </style>
 </head>
 <body>
-    <!-- Вкладки -->
+    <!-- Tab Bar -->
     <div class="tab-bar">
         <button class="tab-btn active" data-tab="catalog">📦 Каталог</button>
         <button class="tab-btn" data-tab="create">➕ Создать</button>
-        <button class="tab-btn" data-tab="favorites">❤️ Избранное</button>
         <button class="tab-btn" data-tab="profile">👤 Профиль</button>
     </div>
     
-    <!-- Каталог -->
+    <!-- Catalog Tab -->
     <div id="catalog" class="tab-content active">
-        <div id="catalog-loading" class="loading">Загрузка...</div>
+        <div id="catalog-loading" class="loading">Загрузка товаров...</div>
         <div id="catalog-list"></div>
     </div>
     
-    <!-- Создание объявления -->
+    <!-- Create Tab -->
     <div id="create" class="tab-content">
         <form id="create-form">
             <div class="form-group">
@@ -219,7 +265,7 @@
             </div>
             <div class="form-group">
                 <label>Город</label>
-                <input type="text" id="city" placeholder="Санкт-Петербург">
+                <input type="text" id="city" placeholder="Москва">
             </div>
             <div class="form-group">
                 <label>Категория</label>
@@ -227,6 +273,7 @@
                     <option value="1">Одежда</option>
                     <option value="2">Обувь</option>
                     <option value="3">Аксессуары</option>
+                    <option value="4">Другое</option>
                 </select>
             </div>
             <div class="form-group">
@@ -236,20 +283,24 @@
             <div class="form-group">
                 <label>Фото</label>
                 <input type="file" id="photo" accept="image/*">
+                <div id="photo-preview" style="margin-top:8px;"></div>
             </div>
             <button type="submit" class="btn">Создать объявление</button>
         </form>
     </div>
     
-    <!-- Избранное -->
-    <div id="favorites" class="tab-content">
-        <div id="favorites-loading" class="loading">Загрузка...</div>
-        <div id="favorites-list"></div>
+    <!-- Profile Tab -->
+    <div id="profile" class="tab-content">
+        <div id="profile-loading" class="loading">Загрузка профиля...</div>
+        <div id="profile-content"></div>
     </div>
     
-    <!-- Профиль -->
-    <div id="profile" class="tab-content">
-        <div id="profile-info" class="loading">Загрузка...</div>
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div id="modal-product"></div>
+            <button class="btn close-modal" onclick="closeProductModal()">Закрыть</button>
+        </div>
     </div>
     
     <script>
@@ -257,8 +308,12 @@
         tg.ready();
         tg.expand();
         
-        let initData = tg.initData;
-        let userId = tg.initDataUnsafe?.user?.id;
+        // Получаем реального пользователя из Telegram
+        const user = tg.initDataUnsafe?.user;
+        const userId = user?.id || null;
+        const userFirstName = user?.first_name || 'Пользователь';
+        
+        let currentProducts = [];
         
         // Переключение вкладок
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -266,11 +321,10 @@
                 const tabName = btn.dataset.tab;
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 document.getElementById(tabName).classList.add('active');
                 
                 if (tabName === 'catalog') loadCatalog();
-                if (tabName === 'favorites') loadFavorites();
                 if (tabName === 'profile') loadProfile();
             });
         });
@@ -282,81 +336,83 @@
             try {
                 const response = await fetch('/api/products');
                 const products = await response.json();
+                currentProducts = products;
                 loading.style.display = 'none';
                 
                 if (products.length === 0) {
-                    container.innerHTML = '<div class="empty">😕 Ничего не найдено. Создайте первое объявление!</div>';
+                    container.innerHTML = '<div class="empty">😕 Пока нет товаров. Создайте первое объявление!</div>';
                     return;
                 }
                 
                 container.innerHTML = products.map(p => `
-                    <div class="product-card" onclick="viewProduct('${p.id}')">
-                        ${p.photo ? `<img class="product-image" src="${p.photo}" onerror="this.src='https://placehold.co/300x200?text=No+Image'">` : '<div class="product-image" style="background:#e0e0e0; display:flex;align-items:center;justify-content:center;">📷 Нет фото</div>'}
+                    <div class="product-card" onclick="showProductModal('${p.id}')">
+                        ${p.photo ? `<img class="product-image" src="${p.photo}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect width=%22300%22 height=%22200%22 fill=%22%23e0e0e0%22/%3E%3Ctext x=%22150%22 y=%22100%22 text-anchor=%22middle%22 fill=%22%23999%22%3E📷%3C/text%3E%3C/svg%3E'">` : '<div class="product-image" style="display:flex;align-items:center;justify-content:center;">📷 Нет фото</div>'}
                         <div class="product-title">${escapeHtml(p.title)}</div>
-                        <div class="product-price">${p.price.toLocaleString()} ₽</div>
-                        <div class="product-city">📍 ${p.city || 'Не указан'}</div>
+                        <div class="product-price">${formatPrice(p.price)} ₽</div>
+                        <div class="product-city">📍 ${escapeHtml(p.city) || 'Не указан'}</div>
+                        <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('${p.id}', this)">❤️</button>
                     </div>
                 `).join('');
             } catch (e) {
                 console.error(e);
-                container.innerHTML = '<div class="empty">❌ Ошибка загрузки</div>';
+                container.innerHTML = '<div class="empty">❌ Ошибка загрузки каталога</div>';
             }
         }
         
-        // Загрузка избранного
-        async function loadFavorites() {
-            const container = document.getElementById('favorites-list');
-            const loading = document.getElementById('favorites-loading');
+        // Показать товар в модалке
+        async function showProductModal(productId) {
+            const product = currentProducts.find(p => p.id === productId);
+            if (!product) return;
+            
+            const modal = document.getElementById('product-modal');
+            const modalContent = document.getElementById('modal-product');
+            
+            modalContent.innerHTML = `
+                ${product.photo ? `<img src="${product.photo}" style="width:100%;border-radius:8px;margin-bottom:12px;">` : ''}
+                <div style="font-size:20px;font-weight:600;margin-bottom:8px">${escapeHtml(product.title)}</div>
+                <div style="font-size:24px;font-weight:700;color:var(--tg-theme-button-color);margin-bottom:8px">${formatPrice(product.price)} ₽</div>
+                <div style="margin-bottom:8px">📍 ${escapeHtml(product.city) || 'Не указан'}</div>
+                <div style="margin-bottom:8px">📅 ${new Date(product.created_at).toLocaleDateString()}</div>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee">${escapeHtml(product.description) || 'Описание отсутствует'}</div>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.remove('active');
+        }
+        
+        // Добавить/удалить из избранного
+        async function toggleFavorite(productId, btn) {
+            if (!userId) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Не удалось определить пользователя',
+                    buttons: [{type: 'ok'}]
+                });
+                return;
+            }
+            
             try {
-                const response = await fetch(`/api/favorites?user_id=${userId}&init_data=${encodeURIComponent(initData)}`);
-                const products = await response.json();
-                loading.style.display = 'none';
+                const response = await fetch('/api/toggle-favorite', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        user_id: userId,
+                        ad_id: parseInt(productId)
+                    })
+                });
+                const result = await response.json();
                 
-                if (products.length === 0) {
-                    container.innerHTML = '<div class="empty">❤️ Нет избранных товаров</div>';
-                    return;
+                if (result.success) {
+                    btn.style.color = result.action === 'added' ? 'red' : 'gray';
+                    if (result.action === 'added') {
+                        tg.showPopup({title: 'Добавлено', message: 'Товар добавлен в избранное', buttons: [{type: 'ok'}], timer: 1500});
+                    }
                 }
-                
-                container.innerHTML = products.map(p => `
-                    <div class="product-card" onclick="viewProduct('${p.id}')">
-                        ${p.photo ? `<img class="product-image" src="${p.photo}">` : '<div class="product-image">📷</div>'}
-                        <div class="product-title">${escapeHtml(p.title)}</div>
-                        <div class="product-price">${p.price} ₽</div>
-                    </div>
-                `).join('');
             } catch (e) {
                 console.error(e);
-                container.innerHTML = '<div class="empty">❌ Ошибка загрузки</div>';
-            }
-        }
-        
-        // Загрузка профиля
-        async function loadProfile() {
-            const container = document.getElementById('profile-info');
-            try {
-                const response = await fetch(`/api/profile?user_id=${userId}&init_data=${encodeURIComponent(initData)}`);
-                const user = await response.json();
-                
-                container.innerHTML = `
-                    <div class="profile-info">
-                        <div class="profile-name">${escapeHtml(user.first_name || 'Пользователь')}</div>
-                        ${user.username ? `<div style="color:#666">@${user.username}</div>` : ''}
-                    </div>
-                    <div class="profile-stats">
-                        <div class="stat">
-                            <div class="stat-value">${user.ads_count || 0}</div>
-                            <div class="stat-label">Объявлений</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">${user.favorites_count || 0}</div>
-                            <div class="stat-label">В избранном</div>
-                        </div>
-                    </div>
-                    <button class="btn" onclick="logout()">Выйти из аккаунта</button>
-                `;
-            } catch (e) {
-                console.error(e);
-                container.innerHTML = '<div class="empty">❌ Ошибка загрузки профиля</div>';
             }
         }
         
@@ -364,18 +420,39 @@
         document.getElementById('create-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = new FormData();
-            formData.append('title', document.getElementById('title').value);
-            formData.append('price', document.getElementById('price').value);
-            formData.append('city', document.getElementById('city').value);
-            formData.append('category_id', document.getElementById('category_id').value);
-            formData.append('description', document.getElementById('description').value);
-            formData.append('init_data', initData);
+            if (!userId) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Пожалуйста, перезапустите приложение',
+                    buttons: [{type: 'ok'}]
+                });
+                return;
+            }
             
+            const title = document.getElementById('title').value;
+            const price = document.getElementById('price').value;
+            const city = document.getElementById('city').value;
+            const categoryId = document.getElementById('category_id').value;
+            const description = document.getElementById('description').value;
             const photoFile = document.getElementById('photo').files[0];
+            
+            if (!title || !price || !description) {
+                tg.showPopup({title: 'Ошибка', message: 'Заполните обязательные поля', buttons: [{type: 'ok'}]});
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('price', price);
+            formData.append('city', city);
+            formData.append('category_id', categoryId);
+            formData.append('description', description);
+            formData.append('user_id', userId);
+            formData.append('init_data', tg.initData);
             if (photoFile) formData.append('photo', photoFile);
             
             const btn = e.target.querySelector('.btn');
+            const originalText = btn.textContent;
             btn.textContent = 'Создаём...';
             btn.disabled = true;
             
@@ -393,10 +470,11 @@
                         buttons: [{type: 'ok'}]
                     });
                     document.getElementById('create-form').reset();
+                    document.getElementById('photo-preview').innerHTML = '';
                     loadCatalog();
                     document.querySelector('[data-tab="catalog"]').click();
                 } else {
-                    throw new Error(result.error);
+                    throw new Error(result.error || 'Ошибка создания');
                 }
             } catch (e) {
                 tg.showPopup({
@@ -405,21 +483,81 @@
                     buttons: [{type: 'ok'}]
                 });
             } finally {
-                btn.textContent = 'Создать объявление';
+                btn.textContent = originalText;
                 btn.disabled = false;
             }
         });
         
-        function viewProduct(id) {
+        // Превью фото
+        document.getElementById('photo').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const preview = document.getElementById('photo-preview');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.innerHTML = `<img src="${event.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '';
+            }
+        });
+        
+        // Загрузка профиля
+        async function loadProfile() {
+            const container = document.getElementById('profile-content');
+            const loading = document.getElementById('profile-loading');
+            
+            if (!userId) {
+                loading.style.display = 'none';
+                container.innerHTML = `
+                    <div class="profile-header">
+                        <div class="profile-name">Гость</div>
+                        <div>Войдите в Telegram чтобы использовать все функции</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/profile?user_id=${userId}`);
+                const userData = await response.json();
+                loading.style.display = 'none';
+                
+                container.innerHTML = `
+                    <div class="profile-header">
+                        <div class="profile-name">${escapeHtml(userData.first_name || userFirstName)}</div>
+                        ${userData.username ? `<div style="color:#666">@${userData.username}</div>` : ''}
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <div class="stat-value">${userData.ads_count || 0}</div>
+                            <div class="stat-label">Объявлений</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${userData.favorites_count || 0}</div>
+                            <div class="stat-label">В избранном</div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="shareProfile()">📤 Поделиться профилем</button>
+                    <button class="btn" style="margin-top:12px;background:#dc3545" onclick="tg.close()">🚪 Закрыть</button>
+                `;
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = '<div class="empty">❌ Ошибка загрузки профиля</div>';
+            }
+        }
+        
+        function shareProfile() {
             tg.showPopup({
-                title: 'Просмотр',
-                message: 'Функция просмотра товара в разработке',
+                title: 'Поделиться',
+                message: `Привет! Я в GLOWREP\nМой ID: ${userId}`,
                 buttons: [{type: 'ok'}]
             });
         }
         
-        function logout() {
-            tg.close();
+        function formatPrice(price) {
+            return Number(price).toLocaleString('ru-RU');
         }
         
         function escapeHtml(str) {
@@ -434,6 +572,11 @@
         
         // Загружаем каталог при старте
         loadCatalog();
+        
+        // Показываем кнопку Main Button если нужно
+        if (user) {
+            tg.MainButton.setText('GLOWREP').show();
+        }
     </script>
 </body>
 </html>
