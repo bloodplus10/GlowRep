@@ -19,14 +19,32 @@ async def on_startup(bot: Bot):
         from database.models import Base
         await conn.run_sync(Base.metadata.create_all)
     
-    # Создаём тестового пользователя если нет
+    # Проверяем структуру User и создаём тестового пользователя если нужно
     async with async_session() as session:
-        from config import settings
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
+        columns = [col['name'] for col in inspector.get_columns('users')]
+        logger.info(f"User table columns: {columns}")
+        
+        # Пытаемся найти или создать тестового пользователя
         test_user = await session.execute(select(User).where(User.telegram_id == 1))
         if not test_user.scalar_one_or_none():
-            test_user = User(telegram_id=1, first_name="Test User", username="test")
-            session.add(test_user)
+            # Создаём с правильными полями
+            test_user_data = {"telegram_id": 1}
+            # Добавляем поля только если они есть
+            if "username" in columns:
+                test_user_data["username"] = "test"
+            if "full_name" in columns:
+                test_user_data["full_name"] = "Test User"
+            if "first_name" in columns:
+                test_user_data["first_name"] = "Test"
+            if "last_name" in columns:
+                test_user_data["last_name"] = "User"
+            
+            new_user = User(**test_user_data)
+            session.add(new_user)
             await session.commit()
+            logger.info("Test user created")
     
     await bot.set_webhook(f"{settings.WEBHOOK_HOST}{settings.WEBHOOK_PATH}")
     logger.info("Webhook set")
@@ -78,9 +96,11 @@ async def api_create_product(request):
             user_result = await session.execute(select(User).where(User.telegram_id == int(user_id)))
             user = user_result.scalar_one_or_none()
             if not user:
-                user = User(telegram_id=int(user_id), first_name="User", username=f"user_{user_id}")
+                # Создаём пользователя с минимальными полями
+                user = User(telegram_id=int(user_id))
                 session.add(user)
                 await session.flush()
+                logger.info(f"Created new user with telegram_id: {user_id}")
             
             # Создаём объявление
             ad = Ad(
@@ -129,7 +149,7 @@ async def api_toggle_favorite(request):
             user_result = await session.execute(select(User).where(User.telegram_id == int(user_id)))
             user = user_result.scalar_one_or_none()
             if not user:
-                user = User(telegram_id=int(user_id), first_name="User", username=f"user_{user_id}")
+                user = User(telegram_id=int(user_id))
                 session.add(user)
                 await session.flush()
             
@@ -149,6 +169,7 @@ async def api_toggle_favorite(request):
             await session.commit()
             return web.json_response({'success': True, 'action': action})
     except Exception as e:
+        logger.error(f"Error toggling favorite: {e}")
         return web.json_response({'success': False, 'error': str(e)}, status=500)
 
 async def api_profile(request):
@@ -162,7 +183,7 @@ async def api_profile(request):
         
         if not user:
             return web.json_response({
-                'first_name': 'User',
+                'first_name': 'Пользователь',
                 'ads_count': 0,
                 'favorites_count': 0
             })
@@ -170,9 +191,18 @@ async def api_profile(request):
         ads_count = await session.execute(select(func.count()).where(Ad.user_id == user.id))
         favorites_count = await session.execute(select(func.count()).where(Favorite.user_id == user.id))
         
+        # Пытаемся получить имя пользователя из разных возможных полей
+        user_name = "Пользователь"
+        if hasattr(user, 'full_name') and user.full_name:
+            user_name = user.full_name
+        elif hasattr(user, 'first_name') and user.first_name:
+            user_name = user.first_name
+        elif hasattr(user, 'username') and user.username:
+            user_name = user.username
+        
         return web.json_response({
-            'first_name': user.first_name or 'User',
-            'username': user.username,
+            'first_name': user_name,
+            'username': getattr(user, 'username', None),
             'ads_count': ads_count.scalar() or 0,
             'favorites_count': favorites_count.scalar() or 0
         })
