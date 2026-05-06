@@ -7,7 +7,7 @@ from aiohttp import web
 from redis.asyncio import Redis
 from config import settings
 from database.engine import engine, async_session
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from database.models import Ad, AdPhoto, User, Favorite
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -22,23 +22,13 @@ async def on_startup(bot: Bot):
         await conn.run_sync(Base.metadata.create_all)
         logger.info("Database tables created")
     
-    # Проверяем и создаём тестового пользователя если нужно
+    # Создаём тестового пользователя если нужно
     async with async_session() as session:
-        from sqlalchemy import inspect
-        inspector = inspect(engine)
-        columns = [col['name'] for col in inspector.get_columns('users')]
-        logger.info(f"User table columns: {columns}")
-        
         # Проверяем есть ли пользователь с telegram_id = 1
         test_user = await session.execute(select(User).where(User.telegram_id == 1))
         if not test_user.scalar_one_or_none():
-            # Создаём пользователя только с существующими полями
-            user_data = {"telegram_id": 1}
-            if "username" in columns:
-                user_data["username"] = "test_user"
-            if "full_name" in columns:
-                user_data["full_name"] = "Test User"
-            new_user = User(**user_data)
+            # Создаём пользователя с минимальными полями
+            new_user = User(telegram_id=1)
             session.add(new_user)
             await session.commit()
             logger.info("Test user created with telegram_id=1")
@@ -193,18 +183,9 @@ async def api_profile(request):
         ads_count = await session.execute(select(func.count()).where(Ad.user_id == user.id))
         favorites_count = await session.execute(select(func.count()).where(Favorite.user_id == user.id))
         
-        # Пытаемся получить имя пользователя из разных возможных полей
-        user_name = "Пользователь"
-        if hasattr(user, 'full_name') and user.full_name:
-            user_name = user.full_name
-        elif hasattr(user, 'first_name') and user.first_name:
-            user_name = user.first_name
-        elif hasattr(user, 'username') and user.username:
-            user_name = user.username
-        
         return web.json_response({
-            'first_name': user_name,
-            'username': getattr(user, 'username', None),
+            'first_name': f"User_{user.telegram_id}",
+            'username': None,
             'ads_count': ads_count.scalar() or 0,
             'favorites_count': favorites_count.scalar() or 0
         })
@@ -265,7 +246,6 @@ async def api_delete_ad(request):
             # Удаляем фото
             photos = await session.execute(select(AdPhoto).where(AdPhoto.ad_id == ad.id))
             for photo in photos.scalars():
-                # Удаляем файл с диска
                 file_path = f"/app/photos/{photo.file_path}"
                 if os.path.exists(file_path):
                     os.remove(file_path)
@@ -332,11 +312,6 @@ async def serve_miniapp(request):
                 const tg = window.Telegram.WebApp;
                 tg.ready();
                 tg.expand();
-                tg.showPopup({
-                    title: 'GLOWREP',
-                    message: 'Mini App готов к работе!',
-                    buttons: [{type: 'ok'}]
-                });
             </script>
         </body>
         </html>
