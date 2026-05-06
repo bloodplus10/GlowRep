@@ -233,7 +233,7 @@ async def api_create_product(request):
         return web.json_response({"success": True, "ad_id": str(ad.id)})
     except Exception as e:
         logger.error(f"Error creating product: {e}", exc_info=True)
-        return web.json_response({"success": False, "error": str(e)}, status=500)
+        return web.json_response({"success": False, "error": "Не удалось создать объявление. Попробуйте позже."}, status=500)
 
 
 async def api_toggle_favorite(request):
@@ -263,7 +263,7 @@ async def api_toggle_favorite(request):
             return web.json_response({"success": True, "action": action})
     except Exception as e:
         logger.error(f"Error toggling favorite: {e}", exc_info=True)
-        return web.json_response({"success": False, "error": str(e)}, status=500)
+        return web.json_response({"success": False, "error": "Ошибка сервера"}, status=500)
 
 
 async def api_favorites(request):
