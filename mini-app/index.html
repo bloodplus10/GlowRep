@@ -370,7 +370,8 @@ try { tg.setHeaderColor('#0a0a0f'); tg.setBackgroundColor('#0a0a0f'); } catch(e)
 
 const API = '';  // same origin
 const tgUser = tg.initDataUnsafe?.user || {};
-const userId = tgUser.id || null;
+const urlParams = new URLSearchParams(window.location.search);
+const userId = tgUser.id || urlParams.get('user_id') || null;
 
 let currentScreen = 'catalog';
 let screenHistory = [];
